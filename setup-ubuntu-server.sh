@@ -28,7 +28,7 @@ ufw enable
 
 # Install essential tools
 echo "Installing essential tools..."
-apt install -y curl wget git vim htop
+apt install -y curl wget git vim htop iotop iftop tmux
 
 echo "Initial setup complete!"
 echo "Log in with the new user: $username"

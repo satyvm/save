@@ -61,14 +61,6 @@ create_sudo_user() {
 }
 create_sudo_user
 
-configure_firewall() {
-    echo "Configuring UFW firewall..."
-    check_command ufw || apt install ufw -y
-    ufw allow OpenSSH || die "Failed to allow OpenSSH"
-    ufw --force enable || die "Firewall activation failed"
-}
-configure_firewall
-
 install_packages() {
     local packages=(
         curl wget git vim htop iotop iftop tmux
@@ -118,31 +110,39 @@ install_monitoring() {
 }
 install_monitoring
 
-system_check() {
-    echo "Running post-installation verification..."
-    [ -d "/home/$username" ] && [ "$(id -u "$username")" ] ||
-        echo "Warning: User home directory verification failed"
-    
-    ufw status verbose | grep -qw active ||
-        echo "Warning: Firewall not active"
-    
-    systemctl is-active --quiet fail2ban ||
-        echo "Warning: Fail2Ban service not running"
+configure_firewall() {
+    echo "Configuring UFW firewall..."
+    check_command ufw || apt install ufw -y
+    ufw allow OpenSSH || die "Failed to allow OpenSSH"
+    ufw --force enable || die "Firewall activation failed"
 }
-system_check
+configure_firewall
 
-echo -e "\nSystem hardening complete!"
-echo "Security services status:"
-echo "--------------------------------------------------"
-systemctl status fail2ban --no-pager | head -n 5
-echo -e "\nClamAV version: $(clamscan --version)"
-echo "--------------------------------------------------"
+# system_check() {
+#     echo "Running post-installation verification..."
+#     [ -d "/home/$username" ] && [ "$(id -u "$username")" ] ||
+#         echo "Warning: User home directory verification failed"
+    
+#     ufw status verbose | grep -qw active ||
+#         echo "Warning: Firewall not active"
+    
+#     systemctl is-active --quiet fail2ban ||
+#         echo "Warning: Fail2Ban service not running"
+# }
+# system_check
 
-if [ -n "${username:-}" ]; then
-    echo -e "\nNext steps:"
-    echo "1. SSH access: Use 'ssh ${username}@$(hostname -I | awk '{print $1}')'"
-    echo "2. Caddy config: /etc/caddy/Caddyfile"
-    echo "3. Review daily security scans in /var/log/"
-else
-    echo -e "\nNo new user created - existing accounts remain unchanged"
-fi
+# echo -e "\nSystem hardening complete!"
+# echo "Security services status:"
+# echo "--------------------------------------------------"
+# systemctl status fail2ban --no-pager | head -n 5
+# echo -e "\nClamAV version: $(clamscan --version)"
+# echo "--------------------------------------------------"
+
+# if [ -n "${username:-}" ]; then
+#     echo -e "\nNext steps:"
+#     echo "1. SSH access: Use 'ssh ${username}@$(hostname -I | awk '{print $1}')'"
+#     echo "2. Caddy config: /etc/caddy/Caddyfile"
+#     echo "3. Review daily security scans in /var/log/"
+# else
+#     echo -e "\nNo new user created - existing accounts remain unchanged"
+# fi

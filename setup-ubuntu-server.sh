@@ -18,11 +18,11 @@ if [[ $create_user =~ ^[Yy]$ ]]; then
     read -p "Enter new username: " username
     adduser $username
     usermod -aG sudo $username
+    sudo passwd $username
+    echo "Disabling root SSH login..."
+    sed -i 's/PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
+    systemctl restart sshd
 fi
-
-echo "Disabling root SSH login..."
-sed -i 's/PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
-systemctl restart sshd
 
 echo "Configuring UFW firewall..."
 apt install ufw -y
